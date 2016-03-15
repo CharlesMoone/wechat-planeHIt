@@ -1,40 +1,43 @@
 /**
  * Created by apple on 16/1/14.
  */
+var canvas, ctx;
+var imgLoad = [];
+
 window.onload = function () {
-    var bulletNumber = 0;
+    canvas = document.getElementById("game");
+    ctx = canvas.getContext("2d");
+    var imgSrc = ["../game/images/plane.png", "../game/images/cartridge.png"];
+
+    for (var i = 0; i < imgSrc.length; i ++) {
+        imgLoad[i] = new Image();
+        imgLoad[i].src = imgSrc[i];
+        if (i == imgSrc.length - 1) {
+            imgLoad[i].onload = game;
+        }
+    }
+};
+
+function game() {
     //屏幕大小
     var size = {
         width: window.innerWidth,
         height: window.innerHeight
-    }
-
-    var canvas = document.getElementById("game");
-    var ctx = canvas.getContext("2d");
+    };
 
     //设置屏幕大小
     canvas.width = size.width;
     canvas.height = size.height;
 
+    var bulletNumber = 0;
     //设置我方飞机基本参数
-    var startX = size.width / 2, startY = size.height * 0.8, planeSrc = "../game/images/plane.png";
+    var startX = size.width / 2, startY = size.height * 0.8;
 
     //初始化我方飞机
-    var plane = new Plane(startX, startY, planeSrc);
-    plane.img.onload = function () {
-        ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
-    }
+    var plane = new Plane(startX, startY, imgLoad[0]);
+    ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
 
-    var bullet = [];
-    setInterval(function () {
-        bullet[bulletNumber] = new Bullet(plane.x, plane.y, "../game/images/cartridge.png");
-        bulletNumber ++;
-        //if (bullet[bulletNumber].y <= 0) {
-        //    bullet.splice(bulletNumber, 1);
-        //}
-    }, 1000);
-
-    canvas.addEventListener('touchmove', function (e) {
+    canvas.addEventListener('touchmove', function(e) {
         e.preventDefault();
         ctx.clearRect(0, 0, size.width, size.height);
         plane.x = event.targetTouches[0].pageX;
@@ -42,36 +45,38 @@ window.onload = function () {
         ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
     });
 
-    //var plane = new Plane(startX, startY, planeSrc, function (img, x, y) {
-    //    console.log(img, ctx);
-    //    ctx.drawImage(img, x - 50 / 2, canvas.height - y);
-    //});
-    //plane.img();
-};
+    var bullet = [];
+    //setInterval(function () {
+    //    bullet[bulletNumber] = new Bullet(plane.x, plane.y, imgLoad[1]);
+    //    ctx.drawImage(bullet[bulletNumber].img, plane.x - 2.5, plane.y - 50, 5, 20);
+    //    bullet[bulletNumber].move(bullet[bulletNumber], bulletNumber, ctx, bullet);
+    //    bulletNumber ++;
+    //}, 500);
+}
 
-function Plane(x, y, src) {
+function Plane(x, y, img) {
     this.x = x;
     this.y = y;
-    var img = new Image();
-    img.src = src;
     this.img = img;
 }
 
-function Bullet(x, y, src) {
-    //console.log("born!");
+function Bullet(x, y, img) {
+    console.log("born!");
     this.x = x - 2.5;
     this.y = y - 5;
-    var img = new Image();
-    img.src = src;
     this.img = img;
+    this.move = function (bullet, bulletNumber, ctx, bulletArray) {
+        var bulletRun = setInterval(function () {
+            console.log("run!");
+            ctx.clearRect(bullet.x, bullet.y, 5, 20);
+            bullet.y -= 10;
+            ctx.drawImage(bullet.img, bullet.x, bullet.y, 5, 20);
+            if (bullet.y <= 0) {
+                window.clearInterval(bulletRun);
+                console.log("delete!");
+                bulletArray.splice(bulletNumber, 1);
+                ctx.clearRect(bullet.x, bullet.y, 5, 20);
+            }
+        }, 50);
+    }
 }
-
-//function Plane (x, y, src, callback) {
-//    this.x = x;
-//    this.y = y;
-//    this.img = function () {
-//        var img = new Image();
-//        img.src = src;
-//        img.onload = callback(img, x, y);
-//    }
-//}
