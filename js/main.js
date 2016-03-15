@@ -7,7 +7,7 @@ var imgLoad = [];
 window.onload = function () {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-    var imgSrc = ["../game/images/plane.png", "../game/images/cartridge.png"];
+    var imgSrc = ["../images/plane.png", "../images/cartridge.png"];
 
     for (var i = 0; i < imgSrc.length; i ++) {
         imgLoad[i] = new Image();
