@@ -9,11 +9,16 @@ window.onload = function () {
     ctx = canvas.getContext("2d");
     var imgSrc = ["./images/plane.png", "./images/cartridge.png"];
 
+    var imgLoadCount = 0;
+
     for (var i = 0; i < imgSrc.length; i ++) {
         imgLoad[i] = new Image();
         imgLoad[i].src = imgSrc[i];
-        if (i == imgSrc.length - 1) {
-            imgLoad[i].onload = game;
+        imgLoad[i].onload = function () {
+            imgLoadCount ++;
+            if (imgLoadCount == imgSrc.length) {
+                game();
+            }
         }
     }
 };
@@ -67,13 +72,13 @@ function Bullet(x, y, img) {
     this.img = img;
     this.move = function (bullet, bulletNumber, ctx, bulletArray) {
         var bulletRun = setInterval(function () {
-            ctx.clearRect(bullet.x, bullet.y, 6, 20);
+            ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
             bullet.y -= 5;
             ctx.drawImage(bullet.img, bullet.x, bullet.y, 5, 20);
             if (bullet.y <= 0) {
                 window.clearInterval(bulletRun);
                 bulletArray.splice(bulletNumber, 1);
-                ctx.clearRect(bullet.x, bullet.y, 6, 20);
+                ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
             }
         }, 15);
     }
