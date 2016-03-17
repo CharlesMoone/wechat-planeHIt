@@ -3,6 +3,7 @@
  */
 var canvas, ctx;
 var imgLoad = [];
+var bulletArray = {};
 
 window.onload = function () {
     canvas = document.getElementById("game");
@@ -50,14 +51,12 @@ function game() {
         ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
     });
 
-    var bullet = [];
     setInterval(function () {
-        bullet[bulletNumber] = new Bullet(plane.x, plane.y, imgLoad[1]);
-        ctx.drawImage(bullet[bulletNumber].img, plane.x - 2.5, plane.y - 50, 5, 20);
-        bullet[bulletNumber].move(bullet[bulletNumber], bulletNumber, ctx, bullet);
+        bulletArray[bulletNumber] = new Bullet(plane.x, plane.y, imgLoad[1], bulletNumber);
+        ctx.drawImage(bulletArray[bulletNumber].img, plane.x - 2.5, plane.y - 50, 5, 20);
+        bulletArray[bulletNumber].move(bulletArray[bulletNumber], bulletNumber, ctx);
         bulletNumber ++;
-        //console.log(bullet);
-    }, 500);
+    }, 450);
 }
 
 function Plane(x, y, img) {
@@ -70,15 +69,15 @@ function Bullet(x, y, img) {
     this.x = x - 2.5;
     this.y = y - 50;
     this.img = img;
-    this.move = function (bullet, bulletNumber, ctx, bulletArray) {
+    this.move = function (bullet, bulletNumber, ctx) {
         var bulletRun = setInterval(function () {
             ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
             bullet.y -= 5;
             ctx.drawImage(bullet.img, bullet.x, bullet.y, 5, 20);
             if (bullet.y <= 0) {
                 window.clearInterval(bulletRun);
-                bulletArray.splice(bulletNumber, 1);
                 ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
+                delete(bulletArray[bulletNumber]);
             }
         }, 15);
     }
