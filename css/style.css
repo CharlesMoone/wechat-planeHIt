@@ -1,3 +1,6 @@
+* {
+    overflow: hidden;
+}
 .canvasGame {
     position: absolute;
     top: -100%;
