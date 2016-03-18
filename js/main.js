@@ -3,15 +3,20 @@
  */
 var canvas, ctx;
 var imgLoad = [];
+var plane;
+//子弹数组
 var bulletArray = {};
+//敌人数组
+var enemyArray = {};
 
 window.onload = function () {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-    var imgSrc = ["./images/plane.png", "./images/cartridge.png"];
+    var imgSrc = ["./images/plane.png", "./images/cartridge.png", "./images/enemy.png"];
 
     var imgLoadCount = 0;
 
+    //加载图片,当图片加载完之后执行game函数
     for (var i = 0; i < imgSrc.length; i ++) {
         imgLoad[i] = new Image();
         imgLoad[i].src = imgSrc[i];
@@ -35,15 +40,20 @@ function game() {
     canvas.width = size.width;
     canvas.height = size.height;
 
-    var bulletNumber = 0;
+    //设置子弹计数器,敌人计数器
+    var bulletNumber = 0, enemyNumber = 0;
     //设置我方飞机基本参数
     var startX = size.width / 2, startY = size.height * 0.8;
 
     //初始化我方飞机
-    var plane = new Plane(startX, startY, imgLoad[0]);
+    plane = new Plane(startX, startY, imgLoad[0]);
     ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
 
+    //给canvas添加监听事件,当touchmove的时候改变我方飞机的位置,让飞机跟随手所滑动的位置.
     canvas.addEventListener('touchmove', function(e) {
+        //防止e的改变
+        e = e || window.event;
+        //阻止除了touchmove之外的其他touchmove事件
         e.preventDefault();
         ctx.clearRect(plane.x - 25, plane.y - 25, 50, 50);
         plane.x = event.targetTouches[0].pageX;
@@ -51,12 +61,24 @@ function game() {
         ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
     });
 
+    //设置飞机子弹,每250s产生一发子弹
     setInterval(function () {
-        bulletArray[bulletNumber] = new Bullet(plane.x, plane.y, imgLoad[1], bulletNumber);
+        bulletArray[bulletNumber] = new Bullet(plane.x, plane.y, imgLoad[1]);
         ctx.drawImage(bulletArray[bulletNumber].img, plane.x - 2.5, plane.y - 50, 5, 20);
         bulletArray[bulletNumber].move(bulletArray[bulletNumber], bulletNumber, ctx);
         bulletNumber ++;
     }, 250);
+
+    var generateTime = Math.random() * 1000, generatePosition = 0;
+
+    //设置敌人,随机时间在300-500之间在宽度0~100%之间随机位置出现
+    setInterval(function () {
+        generatePosition = Math.random();
+        enemyArray[enemyNumber] = new Enemy(canvas.width * generatePosition, -43, imgLoad[2]);
+        ctx.drawImage(enemyArray[enemyNumber].img, enemyArray[enemyNumber].x, enemyArray[enemyNumber].y, 57, 43);
+        enemyArray[enemyNumber].move(enemyArray[enemyNumber], enemyNumber, ctx);
+        enemyNumber ++;
+    }, generateTime + 2000);
 }
 
 function Plane(x, y, img) {
@@ -74,11 +96,31 @@ function Bullet(x, y, img) {
             ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
             bullet.y -= 5;
             ctx.drawImage(bullet.img, bullet.x, bullet.y, 5, 20);
+            ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
             if (bullet.y <= 0) {
                 window.clearInterval(bulletRun);
                 ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
                 delete(bulletArray[bulletNumber]);
             }
         }, 15);
+    }
+}
+
+function Enemy(x, y, img) {
+    this.x = x;
+    this.y = y;
+    this.img = img;
+    this.move = function (enemy, enemyNumber, ctx) {
+        var enemyRun = setInterval(function () {
+            ctx.clearRect(enemy.x - 1, enemy.y - 1, 58, 44);
+            enemy.y += 5;
+            ctx.drawImage(enemy.img, enemy.x, enemy.y, 57, 43);
+            ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
+            if (enemy.y >= canvas.height) {
+                window.clearInterval(enemyRun);
+                ctx.clearRect(enemy.x - 1, enemy.y - 1, 58, 44);
+                delete(enemyArray[enemyNumber]);
+            }
+        }, 30);
     }
 }

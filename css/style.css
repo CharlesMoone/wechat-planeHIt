@@ -24,7 +24,6 @@ canvas {
         -ms-transform: translateY(0px);
         -o-transform: translateY(0px);
         transform: translateY(0px);
-        /*background-position: 0 0;*/
     }
     to {
         -webkit-transform: translateY(50%);
@@ -32,7 +31,6 @@ canvas {
         -ms-transform: translateY(50%);
         -o-transform: translateY(50%);
         transform: translateY(50%);
-        /*background-position: 0 667px;*/
     }
 }
 body:before {
