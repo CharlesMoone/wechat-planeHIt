@@ -56,7 +56,7 @@ function game() {
         ctx.drawImage(bulletArray[bulletNumber].img, plane.x - 2.5, plane.y - 50, 5, 20);
         bulletArray[bulletNumber].move(bulletArray[bulletNumber], bulletNumber, ctx);
         bulletNumber ++;
-    }, 450);
+    }, 250);
 }
 
 function Plane(x, y, img) {
