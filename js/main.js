@@ -8,8 +8,17 @@ var plane;
 var bulletArray = {};
 //敌人数组
 var enemyArray = {};
+//得分
+var point, pointNumber = 0;
+//是否删除子弹
+var isCollide = {
+    isCollide: "unCollide",
+    bulletNumber: 0
+};
 
 window.onload = function () {
+    point = document.getElementById("point");
+
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
     var imgSrc = ["./images/plane.png", "./images/cartridge.png", "./images/enemy.png"];
@@ -69,16 +78,17 @@ function game() {
         bulletNumber ++;
     }, 250);
 
-    var generateTime = Math.random() * 1000, generatePosition = 0;
+    var generateTime = Math.random() * 500, generatePosition = 0;
+    var enemyStartX = canvas.width - imgLoad[2].width * 2;
 
     //设置敌人,随机时间在300-500之间在宽度0~100%之间随机位置出现
     setInterval(function () {
         generatePosition = Math.random();
-        enemyArray[enemyNumber] = new Enemy(canvas.width * generatePosition, -43, imgLoad[2]);
+        enemyArray[enemyNumber] = new Enemy(enemyStartX * generatePosition + imgLoad[2].width, -imgLoad[2].height, imgLoad[2]);
         ctx.drawImage(enemyArray[enemyNumber].img, enemyArray[enemyNumber].x, enemyArray[enemyNumber].y, 57, 43);
         enemyArray[enemyNumber].move(enemyArray[enemyNumber], enemyNumber, ctx);
         enemyNumber ++;
-    }, generateTime + 2000);
+    }, generateTime + 1000);
 }
 
 function Plane(x, y, img) {
@@ -91,13 +101,17 @@ function Bullet(x, y, img) {
     this.x = x - 2.5;
     this.y = y - 50;
     this.img = img;
+    this.box = {
+        width: img.width,
+        height: img.height
+    }
     this.move = function (bullet, bulletNumber, ctx) {
         var bulletRun = setInterval(function () {
             ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
             bullet.y -= 5;
             ctx.drawImage(bullet.img, bullet.x, bullet.y, 5, 20);
             ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
-            if (bullet.y <= 0) {
+            if (bullet.y <= 0 || (isCollide.isCollide == "collide" && isCollide.bulletNumber == bulletNumber)) {
                 window.clearInterval(bulletRun);
                 ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
                 delete(bulletArray[bulletNumber]);
@@ -110,17 +124,43 @@ function Enemy(x, y, img) {
     this.x = x;
     this.y = y;
     this.img = img;
+    this.point = [100, 1000, 10000];
+    this.box = {
+        width: img.width,
+        height: img.height
+    }
     this.move = function (enemy, enemyNumber, ctx) {
         var enemyRun = setInterval(function () {
             ctx.clearRect(enemy.x - 1, enemy.y - 1, 58, 44);
             enemy.y += 5;
             ctx.drawImage(enemy.img, enemy.x, enemy.y, 57, 43);
             ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
-            if (enemy.y >= canvas.height) {
+            isCollide = collide(enemy);
+            if (enemy.y >= canvas.height || isCollide.isCollide === "collide") {
                 window.clearInterval(enemyRun);
                 ctx.clearRect(enemy.x - 1, enemy.y - 1, 58, 44);
                 delete(enemyArray[enemyNumber]);
             }
         }, 30);
     }
+}
+
+function collide(enemy) {
+    var collideBorderBottom = enemy.y + enemy.box.height;
+    for (var i in bulletArray) {
+        if (bulletArray[i].y <= collideBorderBottom) {
+            if (bulletArray[i].x <= enemy.x + enemy.box.width - bulletArray[i].box.width && bulletArray[i].x >= enemy.x) {
+                pointNumber += enemy.point[0];
+                point.innerHTML = pointNumber;
+                return {
+                    isCollide: "collide",
+                    bulletNumber: i
+                };
+            }
+        }
+    }
+    return {
+        isCollide: "unCollide",
+        bulletNumber: 0
+    };
 }
