@@ -65,8 +65,8 @@ function game() {
         //阻止除了touchmove之外的其他touchmove事件
         e.preventDefault();
         ctx.clearRect(plane.x - 25, plane.y - 25, 50, 50);
-        plane.x = event.targetTouches[0].pageX;
-        plane.y = event.targetTouches[0].pageY;
+        plane.x = e.targetTouches[0].pageX;
+        plane.y = e.targetTouches[0].pageY;
         ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
     });
 
@@ -95,6 +95,10 @@ function Plane(x, y, img) {
     this.x = x;
     this.y = y;
     this.img = img;
+    this.box = {
+        width: img.width,
+        height: img.height
+    };
 }
 
 function Bullet(x, y, img) {
@@ -104,7 +108,7 @@ function Bullet(x, y, img) {
     this.box = {
         width: img.width,
         height: img.height
-    }
+    };
     this.move = function (bullet, bulletNumber, ctx) {
         var bulletRun = setInterval(function () {
             ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
@@ -128,17 +132,17 @@ function Enemy(x, y, img) {
     this.box = {
         width: img.width,
         height: img.height
-    }
+    };
     this.move = function (enemy, enemyNumber, ctx) {
         var enemyRun = setInterval(function () {
-            ctx.clearRect(enemy.x - 1, enemy.y - 1, 58, 44);
+            ctx.clearRect(enemy.x - 1, enemy.y - 1, enemy.box.width + 2, enemy.box.height + 2);
             enemy.y += 5;
-            ctx.drawImage(enemy.img, enemy.x, enemy.y, 57, 43);
+            ctx.drawImage(enemy.img, enemy.x, enemy.y, enemy.box.width, enemy.box.height);
             ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
             isCollide = collide(enemy);
             if (enemy.y >= canvas.height || isCollide.isCollide === "collide") {
                 window.clearInterval(enemyRun);
-                ctx.clearRect(enemy.x - 1, enemy.y - 1, 58, 44);
+                ctx.clearRect(enemy.x - 1, enemy.y - 1, enemy.box.width + 2, enemy.box.height + 2);
                 delete(enemyArray[enemyNumber]);
             }
         }, 30);
