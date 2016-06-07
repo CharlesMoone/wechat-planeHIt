@@ -2,7 +2,31 @@
     overflow: hidden;
     font-family: "Microsoft YaHei"!important;
 }
-p {
+.dead {
+    display: flex;
+    flex-flow: column wrap;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+table {
+    width: 100vw;
+    height: 100vh;
+}
+table td {
+    text-align: center;
+}
+td p:first-child {
+    font-size: 40px;
+}
+td p:last-child {
+    font-size: 30px;
+}
+body > p {
     position: fixed;
     top: 0;
     left: 0;
