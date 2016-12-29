@@ -15,6 +15,8 @@ var isCollide = {
     isCollide: "unCollide",
     bulletNumber: 0
 };
+//是否死亡
+var isDead = false;
 
 window.onload = function () {
     point = document.getElementById("point");
@@ -60,6 +62,17 @@ function game() {
 
     //给canvas添加监听事件,当touchmove的时候改变我方飞机的位置,让飞机跟随手所滑动的位置.
     canvas.addEventListener('touchmove', function(e) {
+        if (e.target.nodeName == 'DIV') return ;
+        if (isDead) {
+            ctx.clearRect(plane.x - 25, plane.y - 25, 50, 50);
+            if (!document.getElementsByClassName('dead')[0]) {
+                var dead = document.createElement('DIV');
+                dead.className = 'dead';
+                dead.innerHTML = '<table><tbody><tr><td><p>Game Over</p><p>your point : ' + document.getElementById('point').innerHTML + '</p></td></tr></tbody></table>';
+                document.getElementsByTagName('body')[0].appendChild(dead);
+            }
+            return ;
+        }
         //防止e的改变
         e = e || window.event;
         //阻止除了touchmove之外的其他touchmove事件
@@ -111,6 +124,10 @@ function Bullet(x, y, img) {
     };
     this.move = function (bullet, bulletNumber, ctx) {
         var bulletRun = setInterval(function () {
+            if (isDead) {
+                if (bulletRun) window.clearInterval(bulletRun);
+                return ;
+            }
             ctx.clearRect(bullet.x - 1, bullet.y, 7, 20);
             bullet.y -= 5;
             ctx.drawImage(bullet.img, bullet.x, bullet.y, 5, 20);
@@ -135,15 +152,22 @@ function Enemy(x, y, img) {
     };
     this.move = function (enemy, enemyNumber, ctx) {
         var enemyRun = setInterval(function () {
+            if (isDead) {
+                if (enemyRun) window.clearInterval(enemyRun);
+                return ;
+            }
             ctx.clearRect(enemy.x - 1, enemy.y - 1, enemy.box.width + 2, enemy.box.height + 2);
             enemy.y += 5;
             ctx.drawImage(enemy.img, enemy.x, enemy.y, enemy.box.width, enemy.box.height);
-            ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
+            // ctx.drawImage(plane.img, plane.x - 25, plane.y - 25, 50, 50);
             isCollide = collide(enemy);
             if (enemy.y >= canvas.height || isCollide.isCollide === "collide") {
                 window.clearInterval(enemyRun);
                 ctx.clearRect(enemy.x - 1, enemy.y - 1, enemy.box.width + 2, enemy.box.height + 2);
                 delete(enemyArray[enemyNumber]);
+            }
+            if ((enemy.x-plane.x>0?((enemy.x-plane.x)<20):((plane.x-enemy.x)<(enemy.box.width+20)))&&((enemy.y-plane.y)>0?((enemy.y-plane.y)<20):((plane.y-enemy.y)<(enemy.box.height+20)))) {
+                isDead = true;
             }
         }, 30);
     }
